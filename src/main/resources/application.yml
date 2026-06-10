@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: no-code
+  datasource:
+    url: jdbc:mysql://localhost:3306/no_code?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=utf8
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  profiles:
+    active: local
+server:
+  port: 8123
+  servlet:
+    context-path: /api
+# springdoc-openapi
+springdoc:
+  group-configs:
+    - group: 'default'
+      packages-to-scan: com.xpc.nocode.controller
+# knife4j
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
