@@ -162,20 +162,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>  implements U
         if (userQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
         }
-        Long id = userQueryRequest.getId();
+        // 管理员查询时忽略 id 参数，避免只查询到单个用户
         String userAccount = userQueryRequest.getUserAccount();
         String userName = userQueryRequest.getUserName();
         String userProfile = userQueryRequest.getUserProfile();
         String userRole = userQueryRequest.getUserRole();
         String sortField = userQueryRequest.getSortField();
         String sortOrder = userQueryRequest.getSortOrder();
-        return QueryWrapper.create()
-                .eq("id", id)
-                .eq("userRole", userRole)
-                .like("userAccount", userAccount)
-                .like("userName", userName)
-                .like("userProfile", userProfile)
-                .orderBy(sortField, "ascend".equals(sortOrder));
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        if (userRole != null) {
+            queryWrapper.eq("userRole", userRole);
+        }
+        if (userAccount != null) {
+            queryWrapper.like("userAccount", userAccount);
+        }
+        if (userName != null) {
+            queryWrapper.like("userName", userName);
+        }
+        if (userProfile != null) {
+            queryWrapper.like("userProfile", userProfile);
+        }
+        if (sortField != null) {
+            queryWrapper.orderBy(sortField, "ascend".equals(sortOrder));
+        }
+        return queryWrapper;
+    }
+
+    @Override
+    public boolean isAdmin(User user) {
+        return user != null && UserRoleEnum.ADMIN.getValue().equals(user.getUserRole());
     }
 
 
