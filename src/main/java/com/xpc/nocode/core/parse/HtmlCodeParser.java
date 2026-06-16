@@ -1,5 +1,7 @@
 package com.xpc.nocode.core.parse;
 
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.xpc.nocode.ai.model.HtmlCodeResult;
 
 import java.util.regex.Matcher;
@@ -17,15 +19,44 @@ public class HtmlCodeParser implements CodeParser<HtmlCodeResult> {
     @Override
     public HtmlCodeResult parseCode(String codeContent) {
         HtmlCodeResult result = new HtmlCodeResult();
-        // 提取 HTML 代码
-        String htmlCode = extractHtmlCode(codeContent);
-        if (htmlCode != null && !htmlCode.trim().isEmpty()) {
-            result.setHtmlCode(htmlCode.trim());
-        } else {
-            // 如果没有找到代码块，将整个内容作为HTML
-            result.setHtmlCode(codeContent.trim());
+        String htmlCode = null;
+        
+        // 尝试从 JSON 格式提取
+        htmlCode = extractFromJson(codeContent);
+        
+        // 如果 JSON 提取失败，尝试从 Markdown 代码块提取
+        if (htmlCode == null || htmlCode.trim().isEmpty()) {
+            htmlCode = extractHtmlCode(codeContent);
         }
+        
+        // 如果都没找到，将整个内容作为HTML
+        if (htmlCode == null || htmlCode.trim().isEmpty()) {
+            htmlCode = codeContent.trim();
+        }
+        
+        result.setHtmlCode(htmlCode.trim());
         return result;
+    }
+
+    /**
+     * 从 JSON 格式中提取 HTML 代码
+     *
+     * @param content 原始内容
+     * @return HTML代码
+     */
+    private String extractFromJson(String content) {
+        try {
+            // 尝试解析为 JSON
+            JSONObject jsonObject = JSONUtil.parseObj(content);
+            // 获取 html 字段
+            if (jsonObject.containsKey("html")) {
+                return jsonObject.getStr("html");
+            }
+        } catch (Exception e) {
+            // 不是 JSON 格式，返回 null
+            return null;
+        }
+        return null;
     }
 
     /**

@@ -5,12 +5,14 @@ import com.xpc.nocode.ai.model.MultiFileCodeResult;
 import com.xpc.nocode.exception.BusinessException;
 import com.xpc.nocode.exception.ErrorCode;
 import com.xpc.nocode.model.enums.CodeGenTypeEnum;
+import org.springframework.stereotype.Component;
 
 /**
  * 多文件代码保存器
  *
  * @author yupi
  */
+@Component
 public class MultiFileCodeFileSaverTemplate extends CodeFileSaverTemplate<MultiFileCodeResult> {
 
     @Override

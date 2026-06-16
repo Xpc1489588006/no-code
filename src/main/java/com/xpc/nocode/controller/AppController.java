@@ -13,17 +13,16 @@ import com.xpc.nocode.constant.UserConstant;
 import com.xpc.nocode.exception.BusinessException;
 import com.xpc.nocode.exception.ErrorCode;
 import com.xpc.nocode.exception.ThrowUtils;
-import com.xpc.nocode.model.dto.app.AppAddRequest;
-import com.xpc.nocode.model.dto.app.AppAdminUpdateRequest;
-import com.xpc.nocode.model.dto.app.AppQueryRequest;
-import com.xpc.nocode.model.dto.app.AppUpdateRequest;
+import com.xpc.nocode.model.dto.app.*;
 import com.xpc.nocode.model.entity.App;
 import com.xpc.nocode.model.entity.User;
+import com.xpc.nocode.model.enums.CodeGenTypeEnum;
 import com.xpc.nocode.model.vo.AppVO;
 import com.xpc.nocode.service.AppService;
 import com.xpc.nocode.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +36,7 @@ import java.util.Map;
  *
  * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
  */
+@Slf4j
 @RestController
 @RequestMapping("/app")
 public class AppController {
@@ -59,6 +59,16 @@ public class AppController {
         ThrowUtils.throwIf(appAddRequest == null, ErrorCode.PARAMS_ERROR);
         // 获取当前登录用户
         User loginUser = userService.getLoginUser(request);
+        
+        // 验证代码生成类型
+        String codeGenType = appAddRequest.getCodeGenType();
+        if (StrUtil.isBlank(codeGenType)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "代码生成类型不能为空");
+        }
+        CodeGenTypeEnum codeGenTypeEnum = CodeGenTypeEnum.getEnumByValue(codeGenType);
+        if (codeGenTypeEnum == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "不支持的代码生成类型");
+        }
 
         App app = new App();
         BeanUtil.copyProperties(appAddRequest, app);
@@ -142,6 +152,7 @@ public class AppController {
     public BaseResponse<AppVO> getAppVOById(long id) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         App app = appService.getById(id);
+        log.info("getAppVOById: appId = {}", id);
         ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
         return ResultUtils.success(appService.getAppVO(app));
     }
@@ -297,6 +308,26 @@ public class AppController {
                                 .build()
                 ));
     }
+
+    /**
+     * 应用部署
+     *
+     * @param appDeployRequest 部署请求
+     * @param request          请求
+     * @return 部署 URL
+     */
+    @PostMapping("/deploy")
+    public BaseResponse<String> deployApp(@RequestBody AppDeployRequest appDeployRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(appDeployRequest == null, ErrorCode.PARAMS_ERROR);
+        Long appId = appDeployRequest.getAppId();
+        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用 ID 不能为空");
+        // 获取当前登录用户
+        User loginUser = userService.getLoginUser(request);
+        // 调用服务部署应用
+        String deployUrl = appService.deployApp(appId, loginUser);
+        return ResultUtils.success(deployUrl);
+    }
+
 
 
 

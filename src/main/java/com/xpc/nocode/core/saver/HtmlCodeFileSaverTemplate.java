@@ -5,12 +5,14 @@ import com.xpc.nocode.ai.model.HtmlCodeResult;
 import com.xpc.nocode.exception.BusinessException;
 import com.xpc.nocode.exception.ErrorCode;
 import com.xpc.nocode.model.enums.CodeGenTypeEnum;
+import org.springframework.stereotype.Component;
 
 /**
  * HTML代码文件保存器
  *
  * @author yupi
  */
+@Component
 public class HtmlCodeFileSaverTemplate extends CodeFileSaverTemplate<HtmlCodeResult> {
 
     @Override

@@ -3,6 +3,7 @@ package com.xpc.nocode.core.saver;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.xpc.nocode.constant.AppConstant;
 import com.xpc.nocode.exception.BusinessException;
 import com.xpc.nocode.exception.ErrorCode;
 import com.xpc.nocode.model.enums.CodeGenTypeEnum;
@@ -18,10 +19,12 @@ import java.nio.charset.StandardCharsets;
 public abstract class CodeFileSaverTemplate<T> {
 
     // 文件保存根目录
-    protected static final String FILE_SAVE_ROOT_DIR = System.getProperty("user.dir") + "/tmp/code_output";
+    protected static final String FILE_SAVE_ROOT_DIR = AppConstant.CODE_OUTPUT_ROOT_DIR;
+
+
 
     /**
-     * 模板方法：保存代码的标准流程
+     * 模板方法：保存代码的标准流程·
      *
      * @param result 代码结果对象
      * @return 保存的目录

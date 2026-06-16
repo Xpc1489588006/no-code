@@ -104,8 +104,8 @@ public class AiCodeGeneratorFacade {
         return codeStream.doOnNext(chunk -> {
             // 实时收集代码片段
             codeBuilder.append(chunk);
-        }).doOnComplete(() -> {
-            // 流式返回完成后保存代码
+        }).collectList().flatMapMany(list -> {
+            // 流接收完成后，同步保存代码再返回
             try {
                 String completeCode = codeBuilder.toString();
                 // 使用执行器解析代码
@@ -116,6 +116,8 @@ public class AiCodeGeneratorFacade {
             } catch (Exception e) {
                 log.error("保存失败: {}", e.getMessage());
             }
+            // 返回原始流
+            return Flux.fromIterable(list);
         });
     }
 
@@ -186,8 +188,8 @@ public class AiCodeGeneratorFacade {
         return codeStream.doOnNext(chunk -> {
             // 实时收集代码片段
             codeBuilder.append(chunk);
-        }).doOnComplete(() -> {
-            // 流式返回完成后保存代码
+        }).collectList().flatMapMany(list -> {
+            // 流接收完成后，同步保存代码再返回
             try {
                 String completeCode = codeBuilder.toString();
                 // 使用执行器解析代码
@@ -198,6 +200,8 @@ public class AiCodeGeneratorFacade {
             } catch (Exception e) {
                 log.error("保存失败: {}", e.getMessage());
             }
+            // 返回原始流
+            return Flux.fromIterable(list);
         });
     }
 
