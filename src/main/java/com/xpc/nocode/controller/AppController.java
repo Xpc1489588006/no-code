@@ -19,6 +19,7 @@ import com.xpc.nocode.model.entity.User;
 import com.xpc.nocode.model.enums.CodeGenTypeEnum;
 import com.xpc.nocode.model.vo.AppVO;
 import com.xpc.nocode.service.AppService;
+import com.xpc.nocode.service.ChatHistoryService;
 import com.xpc.nocode.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,6 +47,9 @@ public class AppController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private ChatHistoryService chatHistoryService;
 
     /**
      * 创建应用
@@ -106,6 +110,9 @@ public class AppController {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
 
+        // 先删除该应用的对话历史
+        chatHistoryService.removeByAppId(appId);
+        
         boolean result = appService.removeById(appId);
         return ResultUtils.success(result);
     }
@@ -209,6 +216,9 @@ public class AppController {
         App app = appService.getById(appId);
         ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
 
+        // 先删除该应用的对话历史
+        chatHistoryService.removeByAppId(appId);
+        
         boolean result = appService.removeById(appId);
         return ResultUtils.success(result);
     }

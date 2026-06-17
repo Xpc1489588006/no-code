@@ -20,6 +20,7 @@ import com.xpc.nocode.model.entity.User;
 import com.xpc.nocode.model.enums.CodeGenTypeEnum;
 import com.xpc.nocode.model.vo.AppVO;
 import com.xpc.nocode.service.AppService;
+import com.xpc.nocode.service.ChatHistoryService;
 import com.xpc.nocode.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private AiCodeGeneratorFacade aiCodeGeneratorFacade;
+
+    @Resource
+    private ChatHistoryService chatHistoryService;
 
     @Override
     public AppVO getAppVO(App app) {

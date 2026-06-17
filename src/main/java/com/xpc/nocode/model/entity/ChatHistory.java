@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 /**
  * 对话历史 实体类。
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+ * @author xpc
  */
 @Data
 @Builder
@@ -36,24 +36,31 @@ public class ChatHistory implements Serializable {
     private Long id;
 
     /**
-     * 消息
-     */
-    private String message;
-
-    /**
-     * user/ai
-     */
-    @Column("messageType")
-    private String messageType;
-
-    /**
-     * 应用id
+     * 应用 id
      */
     @Column("appId")
     private Long appId;
 
     /**
-     * 创建用户id
+     * 消息类型（user/ai）
+     */
+    @Column("messageType")
+    private String messageType;
+
+    /**
+     * 消息内容
+     */
+    @Column("content")
+    private String content;
+
+    /**
+     * 错误信息（AI 回复失败时记录）
+     */
+    @Column("errorMessage")
+    private String errorMessage;
+
+    /**
+     * 创建用户 id
      */
     @Column("userId")
     private Long userId;
