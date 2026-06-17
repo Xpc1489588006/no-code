@@ -18,11 +18,15 @@ import com.xpc.nocode.model.vo.ChatHistoryVO;
 import com.xpc.nocode.model.vo.UserVO;
 import com.xpc.nocode.service.ChatHistoryService;
 import com.xpc.nocode.service.UserService;
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -116,7 +120,7 @@ public class ChatHistoryServiceImpl extends com.mybatisflex.spring.service.impl.
     public Page<ChatHistoryVO> listChatHistoryVOByPageWithCursor(ChatHistoryQueryRequest chatHistoryQueryRequest, User loginUser) {
         ThrowUtils.throwIf(chatHistoryQueryRequest == null, ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NOT_LOGIN_ERROR);
-        
+
         Long appId = chatHistoryQueryRequest.getAppId();
         ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用 ID 无效");
 
@@ -134,7 +138,7 @@ public class ChatHistoryServiceImpl extends com.mybatisflex.spring.service.impl.
 
         Page<ChatHistory> chatHistoryPage = this.page(Page.of(pageNum, pageSize),
                 this.getQueryWrapper(chatHistoryQueryRequest));
-        
+
         // 转换为 VO
         Page<ChatHistoryVO> chatHistoryVOPage = new Page<>(pageNum, pageSize, chatHistoryPage.getTotalRow());
         List<ChatHistoryVO> chatHistoryVOList = this.getChatHistoryVOList(chatHistoryPage.getRecords());
@@ -145,13 +149,13 @@ public class ChatHistoryServiceImpl extends com.mybatisflex.spring.service.impl.
     @Override
     public Page<ChatHistoryVO> listChatHistoryVOByPageForAdmin(ChatHistoryQueryRequest chatHistoryQueryRequest) {
         ThrowUtils.throwIf(chatHistoryQueryRequest == null, ErrorCode.PARAMS_ERROR);
-        
+
         long pageNum = chatHistoryQueryRequest.getPageNum();
         long pageSize = chatHistoryQueryRequest.getPageSize();
-        
+
         Page<ChatHistory> chatHistoryPage = this.page(Page.of(pageNum, pageSize),
                 this.getQueryWrapper(chatHistoryQueryRequest));
-        
+
         // 转换为 VO
         Page<ChatHistoryVO> chatHistoryVOPage = new Page<>(pageNum, pageSize, chatHistoryPage.getTotalRow());
         List<ChatHistoryVO> chatHistoryVOList = this.getChatHistoryVOList(chatHistoryPage.getRecords());
@@ -171,7 +175,7 @@ public class ChatHistoryServiceImpl extends com.mybatisflex.spring.service.impl.
                 .messageType(ChatHistoryMessageTypeEnum.USER.getValue())
                 .content(message)
                 .build();
-        
+
         boolean result = this.save(chatHistory);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "保存用户消息失败");
         return chatHistory;
@@ -189,7 +193,7 @@ public class ChatHistoryServiceImpl extends com.mybatisflex.spring.service.impl.
                 .messageType(ChatHistoryMessageTypeEnum.AI.getValue())
                 .content(message)
                 .build();
-        
+
         boolean result = this.save(chatHistory);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "保存 AI 消息失败");
         return chatHistory;
@@ -207,7 +211,7 @@ public class ChatHistoryServiceImpl extends com.mybatisflex.spring.service.impl.
                 .messageType(ChatHistoryMessageTypeEnum.AI.getValue())
                 .errorMessage(errorMessage)
                 .build();
-        
+
         boolean result = this.save(chatHistory);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "保存 AI 错误消息失败");
         return chatHistory;
@@ -216,10 +220,47 @@ public class ChatHistoryServiceImpl extends com.mybatisflex.spring.service.impl.
     @Override
     public boolean removeByAppId(Long appId) {
         ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用 ID 无效");
-        
+
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .eq("appId", appId);
-        
+
         return this.remove(queryWrapper);
     }
+
+    @Override
+    public int loadChatHistoryToMemory(Long appId, MessageWindowChatMemory chatMemory, int maxCount) {
+        try {
+            // 直接构造查询条件，起始点为 1 而不是 0，用于排除最新的用户消息
+            QueryWrapper queryWrapper = QueryWrapper.create()
+                    .eq(ChatHistory::getAppId, appId)
+                    .orderBy(ChatHistory::getCreateTime, false)
+                    .limit(1, maxCount);
+            List<ChatHistory> historyList = this.list(queryWrapper);
+            if (CollUtil.isEmpty(historyList)) {
+                return 0;
+            }
+            // 反转列表，确保按时间正序（老的在前，新的在后）
+            Collections.reverse(historyList);
+            // 按时间顺序添加到记忆中
+            int loadedCount = 0;
+            // 先清理历史缓存，防止重复加载
+            chatMemory.clear();
+            for (ChatHistory history : historyList) {
+                if (ChatHistoryMessageTypeEnum.USER.getValue().equals(history.getMessageType())) {
+                    chatMemory.add(UserMessage.from(history.getContent()));
+                    loadedCount++;
+                } else if (ChatHistoryMessageTypeEnum.AI.getValue().equals(history.getMessageType())) {
+                    chatMemory.add(AiMessage.from(history.getContent()));
+                    loadedCount++;
+                }
+            }
+            log.info("成功为 appId: {} 加载了 {} 条历史对话", appId, loadedCount);
+            return loadedCount;
+        } catch (Exception e) {
+            log.error("加载历史对话失败，appId: {}, error: {}", appId, e.getMessage(), e);
+            // 加载失败不影响系统运行，只是没有历史上下文
+            return 0;
+        }
+    }
+
 }

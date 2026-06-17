@@ -1,6 +1,7 @@
 package com.xpc.nocode.core;
 
 import com.xpc.nocode.ai.AiCodeGeneratorService;
+import com.xpc.nocode.ai.AiCodeGeneratorServiceFactory;
 import com.xpc.nocode.ai.model.HtmlCodeResult;
 import com.xpc.nocode.ai.model.MultiFileCodeResult;
 import com.xpc.nocode.core.parse.CodeParserExecutor;
@@ -32,10 +33,13 @@ public class AiCodeGeneratorFacade {
     @Resource
     MultiFileCodeFileSaverTemplate multiFileCodeFileSaver;
 
-
+    @Resource
+    private AiCodeGeneratorServiceFactory aiCodeGeneratorServiceFactory;
 
     @Resource
     private AiCodeGeneratorService aiCodeGeneratorService;
+
+
 
     /**
      * 统一入口：根据类型生成并保存代码
@@ -131,6 +135,8 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "生成类型为空");
         }
+        // 根据 appId 获取对应的 AI 服务实例
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
         return switch (codeGenTypeEnum) {
             case HTML -> {
                 HtmlCodeResult result = aiCodeGeneratorService.generateHtmlCode(userMessage);
@@ -158,6 +164,8 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "生成类型为空");
         }
+        // 根据 appId 获取对应的 AI 服务实例
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
         return switch (codeGenTypeEnum) {
             case HTML -> {
                 Flux<String> codeStream = aiCodeGeneratorService.generateHtmlCodeStream(userMessage);

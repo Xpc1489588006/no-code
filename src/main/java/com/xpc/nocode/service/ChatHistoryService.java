@@ -7,6 +7,7 @@ import com.xpc.nocode.model.dto.chathistory.ChatHistoryQueryRequest;
 import com.xpc.nocode.model.entity.ChatHistory;
 import com.xpc.nocode.model.entity.User;
 import com.xpc.nocode.model.vo.ChatHistoryVO;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 
 import java.util.List;
 
@@ -95,4 +96,6 @@ public interface ChatHistoryService extends IService<ChatHistory> {
      * @return 删除结果
      */
     boolean removeByAppId(Long appId);
+
+    int loadChatHistoryToMemory(Long appId, MessageWindowChatMemory chatMemory, int maxCount);
 }
