@@ -1,5 +1,6 @@
 package com.xpc.nocode.controller;
 
+
 import com.xpc.nocode.common.BaseResponse;
 import com.xpc.nocode.common.ResultUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,6 @@ public class HealthController {
 
     @GetMapping("/")
     public BaseResponse<String> healthCheck() {
-        return ResultUtils.success( "ok");
+        return ResultUtils.success("ok");
     }
 }

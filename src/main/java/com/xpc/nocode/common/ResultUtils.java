@@ -1,7 +1,11 @@
 package com.xpc.nocode.common;
 
+
 import com.xpc.nocode.exception.ErrorCode;
 
+/**
+ * 快速构造响应结果的工具类
+ */
 public class ResultUtils {
 
     /**

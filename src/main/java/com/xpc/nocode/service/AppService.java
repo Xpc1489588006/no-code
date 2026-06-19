@@ -1,6 +1,5 @@
 package com.xpc.nocode.service;
 
-import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
 import com.xpc.nocode.model.dto.app.AppQueryRequest;
@@ -19,56 +18,46 @@ import java.util.List;
 public interface AppService extends IService<App> {
 
     /**
-     * 获取应用 VO
+     * 通过对话生成应用代码
      *
-     * @param app 应用实体
-     * @return 应用 VO
+     * @param appId 应用 ID
+     * @param message 提示词
+     * @param loginUser 登录用户
+     * @return
+     */
+    Flux<String> chatToGenCode(Long appId, String message, User loginUser);
+
+    /**
+     * 应用部署
+     *
+     * @param appId 应用 ID
+     * @param loginUser 登录用户
+     * @return 可访问的部署地址
+     */
+    String deployApp(Long appId, User loginUser);
+
+    /**
+     * 获取应用封装类
+     *
+     * @param app
+     * @return
      */
     AppVO getAppVO(App app);
 
     /**
-     * 获取应用 VO 列表
+     * 获取应用封装类列表
      *
-     * @param appList 应用实体列表
-     * @return 应用 VO 列表
+     * @param appList
+     * @return
      */
     List<AppVO> getAppVOList(List<App> appList);
 
     /**
-     * 获取查询包装器
+     * 构造应用查询条件
      *
-     * @param appQueryRequest 查询请求
-     * @return 查询包装器
+     * @param appQueryRequest
+     * @return
      */
     QueryWrapper getQueryWrapper(AppQueryRequest appQueryRequest);
 
-    /**
-     * 分页获取应用 VO 列表（仅管理员）
-     *
-     * @param appQueryRequest 查询请求
-     * @return 应用 VO 分页列表
-     */
-    Page<AppVO> listAppVOByPageForAdmin(AppQueryRequest appQueryRequest);
-
-    /**
-     * 分页获取用户自己的应用 VO 列表
-     *
-     * @param appQueryRequest 查询请求
-     * @param userId          用户 ID
-     * @return 应用 VO 分页列表
-     */
-    Page<AppVO> listMyAppVOByPage(AppQueryRequest appQueryRequest, long userId);
-
-    /**
-     * 分页获取精选应用 VO 列表
-     *
-     * @param appQueryRequest 查询请求
-     * @return 应用 VO 分页列表
-     */
-    Page<AppVO> listFeaturedAppVOByPage(AppQueryRequest appQueryRequest);
-
-    Flux<String> chatToGenCode(Long appId, String message, User loginUser);
-
-
-    String deployApp(Long appId, User loginUser);
 }

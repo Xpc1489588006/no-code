@@ -1,5 +1,6 @@
 package com.xpc.nocode.model.dto.user;
 
+
 import com.xpc.nocode.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -37,4 +38,3 @@ public class UserQueryRequest extends PageRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 }
-

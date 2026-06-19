@@ -20,9 +20,9 @@ public class ChatHistoryQueryRequest extends PageRequest implements Serializable
     private Long id;
 
     /**
-     * 应用 id
+     * 消息内容
      */
-    private Long appId;
+    private String message;
 
     /**
      * 消息类型（user/ai）
@@ -30,19 +30,20 @@ public class ChatHistoryQueryRequest extends PageRequest implements Serializable
     private String messageType;
 
     /**
-     * 消息内容
+     * 应用id
      */
-    private String content;
+    private Long appId;
 
     /**
-     * 创建用户 id
+     * 创建用户id
      */
     private Long userId;
 
     /**
-     * 游标（用于向前加载更多历史记录，使用 createTime）
+     * 游标查询 - 最后一条记录的创建时间
+     * 用于分页查询，获取早于此时间的记录
      */
-    private LocalDateTime cursor;
+    private LocalDateTime lastCreateTime;
 
     private static final long serialVersionUID = 1L;
 }

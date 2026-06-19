@@ -6,96 +6,64 @@ import com.mybatisflex.core.service.IService;
 import com.xpc.nocode.model.dto.chathistory.ChatHistoryQueryRequest;
 import com.xpc.nocode.model.entity.ChatHistory;
 import com.xpc.nocode.model.entity.User;
-import com.xpc.nocode.model.vo.ChatHistoryVO;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 /**
  * 对话历史 服务层。
  *
- * @author xpc
+ * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
  */
 public interface ChatHistoryService extends IService<ChatHistory> {
 
     /**
-     * 获取对话历史 VO
-     *
-     * @param chatHistory 对话历史实体
-     * @return 对话历史 VO
-     */
-    ChatHistoryVO getChatHistoryVO(ChatHistory chatHistory);
-
-    /**
-     * 获取对话历史 VO 列表
-     *
-     * @param chatHistoryList 对话历史实体列表
-     * @return 对话历史 VO 列表
-     */
-    List<ChatHistoryVO> getChatHistoryVOList(List<ChatHistory> chatHistoryList);
-
-    /**
-     * 获取查询包装器
-     *
-     * @param chatHistoryQueryRequest 查询请求
-     * @return 查询包装器
-     */
-    QueryWrapper getQueryWrapper(ChatHistoryQueryRequest chatHistoryQueryRequest);
-
-    /**
-     * 分页获取应用的对话历史 VO 列表（游标查询，向前加载更多）
-     *
-     * @param chatHistoryQueryRequest 查询请求
-     * @param loginUser               当前登录用户
-     * @return 对话历史 VO 分页列表
-     */
-    Page<ChatHistoryVO> listChatHistoryVOByPageWithCursor(ChatHistoryQueryRequest chatHistoryQueryRequest, User loginUser);
-
-    /**
-     * 管理员分页获取所有对话历史 VO 列表
-     *
-     * @param chatHistoryQueryRequest 查询请求
-     * @return 对话历史 VO 分页列表
-     */
-    Page<ChatHistoryVO> listChatHistoryVOByPageForAdmin(ChatHistoryQueryRequest chatHistoryQueryRequest);
-
-    /**
-     * 保存用户消息
+     * 添加对话历史
      *
      * @param appId       应用 id
+     * @param message     消息
+     * @param messageType 消息类型
      * @param userId      用户 id
-     * @param message     消息内容
-     * @return 保存的对话历史
+     * @return 是否成功
      */
-    ChatHistory saveUserMessage(Long appId, Long userId, String message);
-
-    /**
-     * 保存 AI 消息
-     *
-     * @param appId       应用 id
-     * @param userId      用户 id
-     * @param message     消息内容
-     * @return 保存的对话历史
-     */
-    ChatHistory saveAiMessage(Long appId, Long userId, String message);
-
-    /**
-     * 保存 AI 错误消息
-     *
-     * @param appId        应用 id
-     * @param userId       用户 id
-     * @param errorMessage 错误信息
-     * @return 保存的对话历史
-     */
-    ChatHistory saveAiErrorMessage(Long appId, Long userId, String errorMessage);
+    boolean addChatMessage(Long appId, String message, String messageType, Long userId);
 
     /**
      * 根据应用 id 删除对话历史
      *
-     * @param appId 应用 id
-     * @return 删除结果
+     * @param appId
+     * @return
      */
-    boolean removeByAppId(Long appId);
+    boolean deleteByAppId(Long appId);
 
+    /**
+     * 分页查询某 APP 的对话记录
+     *
+     * @param appId
+     * @param pageSize
+     * @param lastCreateTime
+     * @param loginUser
+     * @return
+     */
+    Page<ChatHistory> listAppChatHistoryByPage(Long appId, int pageSize,
+                                               LocalDateTime lastCreateTime,
+                                               User loginUser);
+
+    /**
+     * 加载对话历史到内存
+     *
+     * @param appId
+     * @param chatMemory
+     * @param maxCount 最多加载多少条
+     * @return 加载成功的条数
+     */
     int loadChatHistoryToMemory(Long appId, MessageWindowChatMemory chatMemory, int maxCount);
+
+    /**
+     * 构造查询条件
+     *
+     * @param chatHistoryQueryRequest
+     * @return
+     */
+    QueryWrapper getQueryWrapper(ChatHistoryQueryRequest chatHistoryQueryRequest);
 }

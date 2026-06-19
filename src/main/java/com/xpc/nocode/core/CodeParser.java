@@ -1,5 +1,6 @@
 package com.xpc.nocode.core;
 
+
 import com.xpc.nocode.ai.model.HtmlCodeResult;
 import com.xpc.nocode.ai.model.MultiFileCodeResult;
 
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
  *
  * @author yupi
  */
+@Deprecated
 public class CodeParser {
 
     private static final Pattern HTML_CODE_PATTERN = Pattern.compile("```html\\s*\\n([\\s\\S]*?)```", Pattern.CASE_INSENSITIVE);
@@ -87,4 +89,3 @@ public class CodeParser {
         return null;
     }
 }
-

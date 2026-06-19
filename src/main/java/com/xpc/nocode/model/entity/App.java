@@ -35,7 +35,6 @@ public class App implements Serializable {
     @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private Long id;
 
-
     /**
      * 应用名称
      */

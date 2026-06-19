@@ -3,6 +3,7 @@ package com.xpc.nocode.mapper;
 import com.mybatisflex.core.BaseMapper;
 import com.xpc.nocode.model.entity.App;
 
+
 /**
  * 应用 映射层。
  *

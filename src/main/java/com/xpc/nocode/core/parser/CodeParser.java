@@ -1,4 +1,4 @@
-package com.xpc.nocode.core.parse;
+package com.xpc.nocode.core.parser;
 
 /**
  * 代码解析器策略接口

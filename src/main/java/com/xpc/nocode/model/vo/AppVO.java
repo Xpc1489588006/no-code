@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 应用视图对象
+ * 应用封装类
  */
 @Data
 public class AppVO implements Serializable {
@@ -73,4 +73,3 @@ public class AppVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 }
-
