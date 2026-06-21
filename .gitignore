@@ -39,3 +39,4 @@ application-local.yml
 tmp
 src/main/java/com/xpc/nocode/genresult
 
+src/test

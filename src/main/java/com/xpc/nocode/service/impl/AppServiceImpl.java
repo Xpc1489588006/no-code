@@ -24,6 +24,7 @@ import com.xpc.nocode.model.vo.AppVO;
 import com.xpc.nocode.model.vo.UserVO;
 import com.xpc.nocode.service.AppService;
 import com.xpc.nocode.service.ChatHistoryService;
+import com.xpc.nocode.service.ScreenshotService;
 import com.xpc.nocode.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +63,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private VueProjectBuilder vueProjectBuilder;
+
+    @Resource
+    private ScreenshotService screenshotService;
 
     @Override
     public Flux<String> chatToGenCode(Long appId, String message, User loginUser) {
@@ -143,8 +147,45 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         boolean updateResult = this.updateById(updateApp);
         ThrowUtils.throwIf(!updateResult, ErrorCode.OPERATION_ERROR, "更新应用部署信息失败");
         // 10. 返回可访问的 URL 地址
-        return String.format("%s/%s", AppConstant.CODE_DEPLOY_HOST, deployKey);
+        // 10. 得到可访问的 URL 地址
+        String appDeployUrl = String.format("%s/%s", AppConstant.CODE_DEPLOY_HOST, deployKey);
+        // 11. 异步生成截图并且更新应用封面
+        generateAppScreenshotAsync(appId, appDeployUrl);
+        return appDeployUrl;
     }
+    /**
+     * 异步生成应用截图并更新封面
+     *
+     * @param appId  应用ID
+     * @param appUrl 应用访问URL
+     */
+//    @Override
+//    public void generateAppScreenshotAsync(Long appId, String appUrl) {
+//        // 使用虚拟线程并执行
+//        Thread.startVirtualThread(() -> {
+//            // 调用截图服务生成截图并上传
+//            String screenshotUrl = screenshotService.generateAndUploadScreenshot(appUrl);
+//            // 更新数据库的封面
+//            App updateApp = new App();
+//            updateApp.setId(appId);
+//            updateApp.setCover(screenshotUrl);
+//            boolean updated = this.updateById(updateApp);
+//            ThrowUtils.throwIf(!updated, ErrorCode.OPERATION_ERROR, "更新应用封面字段失败");
+//        });
+//    }
+    // 替换 generateAppScreenshotAsync 方法中的虚拟线程为普通线程
+    @Override
+    public void generateAppScreenshotAsync(Long appId, String appUrl) {
+        new Thread(() -> {
+            String screenshotUrl = screenshotService.generateAndUploadScreenshot(appUrl);
+            App updateApp = new App();
+            updateApp.setId(appId);
+            updateApp.setCover(screenshotUrl);
+            boolean updated = this.updateById(updateApp);
+            ThrowUtils.throwIf(!updated, ErrorCode.OPERATION_ERROR, "更新应用封面字段失败");
+        }, "screenshot-generator-" + appId).start();
+    }
+
 
     @Override
     public AppVO getAppVO(App app) {
