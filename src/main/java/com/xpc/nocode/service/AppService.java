@@ -2,6 +2,7 @@ package com.xpc.nocode.service;
 
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
+import com.xpc.nocode.model.dto.app.AppAddRequest;
 import com.xpc.nocode.model.dto.app.AppQueryRequest;
 import com.xpc.nocode.model.entity.App;
 import com.xpc.nocode.model.entity.User;
@@ -62,4 +63,5 @@ public interface AppService extends IService<App> {
      */
     QueryWrapper getQueryWrapper(AppQueryRequest appQueryRequest);
 
+    Long createApp(AppAddRequest appAddRequest, User loginUser);
 }
