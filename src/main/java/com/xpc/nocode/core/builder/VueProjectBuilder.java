@@ -22,15 +22,15 @@ public class VueProjectBuilder {
      *
      * @param projectPath
      */
+    // src/main/java/com/xpc/nocode/core/builder/VueProjectBuilder.java
     public void buildProjectAsync(String projectPath) {
-        Thread.ofVirtual().name("vue-builder-" + System.currentTimeMillis())
-                .start(() -> {
-                    try {
-                        buildProject(projectPath);
-                    } catch (Exception e) {
-                        log.error("异步构建 Vue 项目时发生异常: {}", e.getMessage(), e);
-                    }
-                });
+        new Thread(() -> {
+            try {
+                buildProject(projectPath);
+            } catch (Exception e) {
+                log.error("异步构建 Vue 项目时发生异常: {}", e.getMessage(), e);
+            }
+        }, "vue-builder-" + System.currentTimeMillis()).start();
     }
 
     /**
@@ -131,7 +131,7 @@ public class VueProjectBuilder {
             // 等待进程完成，设置超时（手动实现，不依赖TimeUnit）
             long timeoutMillis = timeoutSeconds * 1000L;
             long startTime = System.currentTimeMillis();
-            
+
             while (true) {
                 try {
                     // 检查进程是否已经结束
