@@ -1,5 +1,6 @@
 package com.xpc.nocode.model.dto.chathistory;
 
+
 import com.xpc.nocode.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -6,7 +6,7 @@ import com.xpc.nocode.exception.ErrorCode;
 import com.xpc.nocode.exception.ThrowUtils;
 import com.xpc.nocode.manager.CosManager;
 import com.xpc.nocode.service.ScreenshotService;
-import com.xpc.nocode.util.WebScreenshotUtils;
+import com.xpc.nocode.utils.WebScreenshotUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,19 +25,20 @@ public class ScreenshotServiceImpl implements ScreenshotService {
 
     @Override
     public String generateAndUploadScreenshot(String webUrl) {
-        ThrowUtils.throwIf(StrUtil.isBlank(webUrl), ErrorCode.PARAMS_ERROR, "网页URL不能为空");
-        log.info("开始生成网页截图，URL: {}", webUrl);
-        // 1. 生成本地截图
+        // 参数校验
+        ThrowUtils.throwIf(StrUtil.isBlank(webUrl), ErrorCode.PARAMS_ERROR, "截图的网址不能为空");
+        log.info("开始生成网页截图，URL：{}", webUrl);
+        // 本地截图
         String localScreenshotPath = WebScreenshotUtils.saveWebPageScreenshot(webUrl);
-        ThrowUtils.throwIf(StrUtil.isBlank(localScreenshotPath), ErrorCode.OPERATION_ERROR, "本地截图生成失败");
+        ThrowUtils.throwIf(StrUtil.isBlank(localScreenshotPath), ErrorCode.OPERATION_ERROR, "生成网页截图失败");
+        // 上传图片到 COS
         try {
-            // 2. 上传到对象存储
             String cosUrl = uploadScreenshotToCos(localScreenshotPath);
-            ThrowUtils.throwIf(StrUtil.isBlank(cosUrl), ErrorCode.OPERATION_ERROR, "截图上传对象存储失败");
-            log.info("网页截图生成并上传成功: {} -> {}", webUrl, cosUrl);
+            ThrowUtils.throwIf(StrUtil.isBlank(cosUrl), ErrorCode.OPERATION_ERROR, "上传截图到对象存储失败");
+            log.info("截图上传成功，URL：{}", cosUrl);
             return cosUrl;
         } finally {
-            // 3. 清理本地文件
+            // 清理本地文件
             cleanupLocalFile(localScreenshotPath);
         }
     }
@@ -80,9 +81,8 @@ public class ScreenshotServiceImpl implements ScreenshotService {
     private void cleanupLocalFile(String localFilePath) {
         File localFile = new File(localFilePath);
         if (localFile.exists()) {
-            File parentDir = localFile.getParentFile();
-            FileUtil.del(parentDir);
-            log.info("本地截图文件已清理: {}", localFilePath);
+            FileUtil.del(localFile);
+            log.info("清理本地文件成功: {}", localFilePath);
         }
     }
 }

@@ -4,9 +4,6 @@ import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.ModelProvider;
-import dev.langchain4j.model.chat.Capability;
-import dev.langchain4j.model.chat.ChatModel;
-
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
@@ -22,7 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import static dev.langchain4j.model.ModelProvider.OTHER;
 import static dev.langchain4j.model.chat.ChatModelListenerUtils.onRequest;
 import static dev.langchain4j.model.chat.ChatModelListenerUtils.onResponse;
-
 
 /**
  * Represents a language model that has a chat API and can stream a response one token at a time.

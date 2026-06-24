@@ -5,13 +5,11 @@ import com.qcloud.cos.ClientConfig;
 import com.qcloud.cos.auth.BasicCOSCredentials;
 import com.qcloud.cos.auth.COSCredentials;
 import com.qcloud.cos.region.Region;
-import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.regex.Pattern;
 
 /**
  * 腾讯云COS配置类
@@ -22,8 +20,6 @@ import java.util.regex.Pattern;
 @ConfigurationProperties(prefix = "cos.client")
 @Data
 public class CosClientConfig {
-
-    private static final Pattern BUCKET_NAME_PATTERN = Pattern.compile("^[a-z0-9-]+$");
 
     /**
      * 域名
@@ -50,13 +46,6 @@ public class CosClientConfig {
      */
     private String bucket;
 
-    @PostConstruct
-    public void validateConfig() {
-        if (bucket == null || !BUCKET_NAME_PATTERN.matcher(bucket).matches()) {
-            throw new IllegalArgumentException("cos.client.bucket must contain only lowercase letters, numbers, and hyphens");
-        }
-    }
-
     @Bean
     public COSClient cosClient() {
         // 初始化用户身份信息(secretId, secretKey)
@@ -67,4 +56,3 @@ public class CosClientConfig {
         return new COSClient(cred, clientConfig);
     }
 }
-

@@ -6,6 +6,8 @@ import cn.hutool.core.util.RuntimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 import java.io.File;
 
 
@@ -22,15 +24,15 @@ public class VueProjectBuilder {
      *
      * @param projectPath
      */
-    // src/main/java/com/xpc/nocode/core/builder/VueProjectBuilder.java
     public void buildProjectAsync(String projectPath) {
-        new Thread(() -> {
-            try {
-                buildProject(projectPath);
-            } catch (Exception e) {
-                log.error("异步构建 Vue 项目时发生异常: {}", e.getMessage(), e);
-            }
-        }, "vue-builder-" + System.currentTimeMillis()).start();
+        Thread.ofVirtual().name("vue-builder-" + System.currentTimeMillis())
+                .start(() -> {
+                    try {
+                        buildProject(projectPath);
+                    } catch (Exception e) {
+                        log.error("异步构建 Vue 项目时发生异常: {}", e.getMessage(), e);
+                    }
+                });
     }
 
     /**
@@ -128,27 +130,12 @@ public class VueProjectBuilder {
                     workingDir,
                     command.split("\\s+") // 命令分割为数组
             );
-            // 等待进程完成，设置超时（手动实现，不依赖TimeUnit）
-            long timeoutMillis = timeoutSeconds * 1000L;
-            long startTime = System.currentTimeMillis();
-
-            while (true) {
-                try {
-                    // 检查进程是否已经结束
-                    process.exitValue();
-                    // 进程已结束
-                    break;
-                } catch (IllegalThreadStateException e) {
-                    // 进程还在运行
-                    long elapsed = System.currentTimeMillis() - startTime;
-                    if (elapsed >= timeoutMillis) {
-                        log.error("命令执行超时（{}秒），强制终止进程", timeoutSeconds);
-                        process.destroyForcibly();
-                        return false;
-                    }
-                    // 等待一小段时间后再次检查
-                    Thread.sleep(100);
-                }
+            // 等待进程完成，设置超时
+            boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
+            if (!finished) {
+                log.error("命令执行超时（{}秒），强制终止进程", timeoutSeconds);
+                process.destroyForcibly();
+                return false;
             }
             int exitCode = process.exitValue();
             if (exitCode == 0) {
