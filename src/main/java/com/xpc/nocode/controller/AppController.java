@@ -18,6 +18,8 @@ import com.xpc.nocode.model.dto.app.*;
 import com.xpc.nocode.model.entity.App;
 import com.xpc.nocode.model.entity.User;
 import com.xpc.nocode.model.vo.AppVO;
+import com.xpc.nocode.ratelimter.annotation.RateLimit;
+import com.xpc.nocode.ratelimter.enums.RateLimitType;
 import com.xpc.nocode.service.AppService;
 import com.xpc.nocode.service.ProjectDownloadService;
 import com.xpc.nocode.service.UserService;
@@ -56,6 +58,7 @@ public class AppController {
     private ProjectDownloadService projectDownloadService;
 
     @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @RateLimit(limitType = RateLimitType.USER, rate = 5, rateInterval = 60, message = "AI 对话请求过于频繁，请稍后再试")
     public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam Long appId,
                                                        @RequestParam String message,
                                                        HttpServletRequest request) {
