@@ -31,6 +31,7 @@ import com.xpc.nocode.service.ScreenshotService;
 import com.xpc.nocode.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -69,6 +70,12 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private ScreenshotService screenshotService;
+
+    @Value("${code.deploy-host:http://localhost}")
+    private String deployHost;
+
+
+
 
     @Resource
     private AiCodeGenTypeRoutingServiceFactory aiCodeGenTypeRoutingServiceFactory;
@@ -173,9 +180,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         updateApp.setDeployedTime(LocalDateTime.now());
         boolean updateResult = this.updateById(updateApp);
         ThrowUtils.throwIf(!updateResult, ErrorCode.OPERATION_ERROR, "更新应用部署信息失败");
-        // 10. 得到可访问的 URL 地址
-        String appDeployUrl = String.format("%s/%s", AppConstant.CODE_DEPLOY_HOST, deployKey);
-        // 11. 异步生成截图并且更新应用封面
+        // 10. 构建应用访问 URL
+        String appDeployUrl = String.format("%s/%s/", deployHost, deployKey);
         generateAppScreenshotAsync(appId, appDeployUrl);
         return appDeployUrl;
     }

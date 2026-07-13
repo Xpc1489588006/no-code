@@ -36,6 +36,7 @@ build/
 
 ### CUSTOM ###
 application-local.yml
+application-prod.yml
 tmp
 src/main/java/com/xpc/nocode/genresult
 
