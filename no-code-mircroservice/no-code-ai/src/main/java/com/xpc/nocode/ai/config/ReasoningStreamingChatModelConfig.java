@@ -1,28 +1,19 @@
-package com.xpc.nocode.config;
+package com.xpc.nocode.ai.config;
 
 
-import com.xpc.nocode.monitor.AiModelMonitorListener;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
-import jakarta.annotation.Resource;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
-import java.util.List;
-
-/**
- * 流式对话模型配置
- */
 @Configuration
-@ConfigurationProperties(prefix = "langchain4j.open-ai.streaming-chat-model")
+@ConfigurationProperties(prefix = "langchain4j.open-ai.reasoning-streaming-chat-model")
 @Data
-public class StreamingChatModelConfig {
+public class ReasoningStreamingChatModelConfig {
 
-    @Resource
-    private AiModelMonitorListener aiModelMonitorListener;
 
 
     private String baseUrl;
@@ -35,16 +26,16 @@ public class StreamingChatModelConfig {
 
     private Double temperature;
 
-    private boolean logRequests;
+    private Boolean logRequests = false;
 
-    private boolean logResponses;
+    private Boolean logResponses = false;
 
     /**
-     * 流式模型
+     * 推理流式模型（用于 Vue 项目生成，带工具调用）
      */
     @Bean
     @Scope("prototype")
-    public StreamingChatModel streamingChatModelPrototype() {
+    public StreamingChatModel reasoningStreamingChatModelPrototype() {
         return OpenAiStreamingChatModel.builder()
                 .apiKey(apiKey)
                 .baseUrl(baseUrl)
@@ -53,7 +44,6 @@ public class StreamingChatModelConfig {
                 .temperature(temperature)
                 .logRequests(logRequests)
                 .logResponses(logResponses)
-                .listeners(List.of(aiModelMonitorListener))
                 .build();
     }
 }

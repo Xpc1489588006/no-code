@@ -11,6 +11,7 @@
     <groupId>com.xpc</groupId>
     <artifactId>no-code</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <name>no-code</name>
     <description>no-code</description>
     <url/>
@@ -20,6 +21,9 @@
     <developers>
         <developer/>
     </developers>
+    <modules>
+        <module>no-code-mircroservice</module>
+    </modules>
     <scm>
         <connection/>
         <developerConnection/>
@@ -123,6 +127,7 @@
             <version>1.18.36</version>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -149,6 +154,16 @@
             <artifactId>redisson</artifactId>
             <version>3.50.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
 
 
 

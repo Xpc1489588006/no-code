@@ -7,6 +7,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+
 import com.xpc.nocode.ai.AiCodeGenTypeRoutingService;
 import com.xpc.nocode.ai.AiCodeGenTypeRoutingServiceFactory;
 import com.xpc.nocode.constant.AppConstant;
@@ -16,6 +17,8 @@ import com.xpc.nocode.core.handler.StreamHandlerExecutor;
 import com.xpc.nocode.exception.BusinessException;
 import com.xpc.nocode.exception.ErrorCode;
 import com.xpc.nocode.exception.ThrowUtils;
+import com.xpc.nocode.innerservice.InnerScreenshotService;
+import com.xpc.nocode.innerservice.InnerUserService;
 import com.xpc.nocode.mapper.AppMapper;
 import com.xpc.nocode.model.dto.app.AppAddRequest;
 import com.xpc.nocode.model.dto.app.AppQueryRequest;
@@ -25,15 +28,15 @@ import com.xpc.nocode.model.enums.ChatHistoryMessageTypeEnum;
 import com.xpc.nocode.model.enums.CodeGenTypeEnum;
 import com.xpc.nocode.model.vo.AppVO;
 import com.xpc.nocode.model.vo.UserVO;
-import com.xpc.nocode.monitor.MonitorContext;
-import com.xpc.nocode.monitor.MonitorContextHolder;
+
 import com.xpc.nocode.service.AppService;
 import com.xpc.nocode.service.ChatHistoryService;
-import com.xpc.nocode.service.ScreenshotService;
-import com.xpc.nocode.service.UserService;
+
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -55,8 +58,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppService {
 
-    @Resource
-    private UserService userService;
 
     @Resource
     private AiCodeGeneratorFacade aiCodeGeneratorFacade;
@@ -70,17 +71,21 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     @Resource
     private VueProjectBuilder vueProjectBuilder;
 
-    @Resource
-    private ScreenshotService screenshotService;
 
     @Value("${code.deploy-host:http://localhost}")
     private String deployHost;
 
-
-
-
     @Resource
     private AiCodeGenTypeRoutingServiceFactory aiCodeGenTypeRoutingServiceFactory;
+
+    @Resource
+    @Lazy
+    private InnerScreenshotService screenshotService;
+
+    @DubboReference
+    private InnerUserService userService;
+
+
 
     @Override
     public Flux<String> chatToGenCode(Long appId, String message, User loginUser) {
@@ -100,23 +105,30 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "应用代码生成类型错误");
         }
+//        // 5. 通过校验后，添加用户消息到对话历史
+//        chatHistoryService.addChatMessage(appId, message, ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
+//        // 6. 设置监控上下文
+//        MonitorContextHolder.setContext(
+//                MonitorContext.builder()
+//                        .userId(loginUser.getId().toString())
+//                        .appId(appId.toString())
+//                        .build()
+//        );
+//        // 7. 调用 AI 生成代码（流式）
+//        Flux<String> codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(message, codeGenTypeEnum, appId);
+//        // 8. 收集 AI 响应内容并在完成后记录到对话历史
+//        return streamHandlerExecutor.doExecute(codeStream, chatHistoryService, appId, loginUser, codeGenTypeEnum)
+//                .doFinally(signalType -> {
+//                    // 流结束时清理（无论成功/失败/取消）
+//                    MonitorContextHolder.clearContext();
+//                });
+
         // 5. 通过校验后，添加用户消息到对话历史
         chatHistoryService.addChatMessage(appId, message, ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
-        // 6. 设置监控上下文
-        MonitorContextHolder.setContext(
-                MonitorContext.builder()
-                        .userId(loginUser.getId().toString())
-                        .appId(appId.toString())
-                        .build()
-        );
-        // 7. 调用 AI 生成代码（流式）
+// 6. 调用 AI 生成代码（流式）
         Flux<String> codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(message, codeGenTypeEnum, appId);
-        // 8. 收集 AI 响应内容并在完成后记录到对话历史
-        return streamHandlerExecutor.doExecute(codeStream, chatHistoryService, appId, loginUser, codeGenTypeEnum)
-                .doFinally(signalType -> {
-                    // 流结束时清理（无论成功/失败/取消）
-                    MonitorContextHolder.clearContext();
-                });
+// 7. 收集 AI 响应内容并在完成后记录到对话历史
+        return streamHandlerExecutor.doExecute(codeStream, chatHistoryService, appId, loginUser, codeGenTypeEnum);
 
     }
 
