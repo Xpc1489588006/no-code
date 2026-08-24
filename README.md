@@ -4,21 +4,25 @@
 
 > 1.首页
 >
-> ![image-20260723220057616](C:\Users\14895\AppData\Roaming\Typora\typora-user-images\image-20260723220057616.png)
+> ![首页](docs/images/home.png)
 >
-> 2.生成页和预览页![image-20260723220228723](C:\Users\14895\AppData\Roaming\Typora\typora-user-images\image-20260723220228723.png)
+> 2.生成页和预览页
+>
+> ![生成页和预览页](docs/images/chat-preview.png)
 >
 > 3.部署成功
 >
-> ![image-20260723220323093](C:\Users\14895\AppData\Roaming\Typora\typora-user-images\image-20260723220323093.png)
+> ![部署成功](docs/images/deploy-success.png)
 >
 > 4.可视化修改
 >
-> ![image-20260723220723656](C:\Users\14895\AppData\Roaming\Typora\typora-user-images\image-20260723220723656.png)
+> ![可视化修改](docs/images/visual-edit.png)
 >
-> 5.系统管理![image-20260723220818583](C:\Users\14895\AppData\Roaming\Typora\typora-user-images\image-20260723220818583.png)
+> 5.系统管理
 >
-> ![image-20260723220839314](C:\Users\14895\AppData\Roaming\Typora\typora-user-images\image-20260723220839314.png)
+> ![系统管理-用户管理](docs/images/admin-1.png)
+>
+> ![系统管理-应用管理](docs/images/admin-2.png)
 
 ## 项目亮点
 
